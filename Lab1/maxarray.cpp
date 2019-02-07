@@ -2,26 +2,24 @@
 // Assignment Number: Lab 1
 // File Name:         maxarray.cpp
 // Course/Section:    COSC 2436 Section 001
-// Date:              2/5/2019
+// Date:              2/7/2019
 // Instructor:        Michael Miller
 
-// Refer to:
-// template_main.cpp in Examples
-// how to build template functions
-// don't create classes
-// use max function to compare arrays of size 1
-
 /*-------------------------------------------------------------------------
-   Program to illustrate the use of a function template to display
-   an array with elements of any type for which << is defined.
+   Program to illustrate the use of a recursive template function to find
+   and display the element with the maximum value of an array with elements
+   of any type for which << is defined.
 
-   Output:  An array of ints and an array of doubles using display()
+   Output:  An array of doubles, an array of ints, and an array of strings
+   using display().
+   The maximum value element of each of those arrays using maxArray().
  -------------------------------------------------------------------------*/
 
-#include <algorithm> // used for max function
-#include <iostream>
-#include <string>
+#include <algorithm>    // max function
+#include <iostream>     // cout
+#include <string>       // strings
 
+// Function prototypes
 template <class ElementType>
 void display(const ElementType array[], int numElements);
 template <class ElementType>
@@ -29,18 +27,20 @@ ElementType maxArray(const ElementType array[], int first, int last);
 
 int main()
 {
+    std::cout << "This is an array of doubles:\n";
     double x[] = {1.1, 6.3, 2.2, 3.3, 4.4, 5.5};
     display(x, 6);
-    //maxArray(x, 0, 4);
-    std::cout << "maxArray: " << maxArray(x, 5, 0) << std::endl;
+    std::cout << "The max value is: " << maxArray(x, 5, 0) << "\n\n";
 
-    //int num[] = {1, 2, 3, 4};
-    //display (num, 4);
-    //maxArray(num, 0, 3);
+    std::cout << "This is an array of integers:\n";
+    int num[] = {1, 2, 3, 4};
+    display (num, 4);
+    std::cout << "The max value is: " << maxArray(num, 0, 3) << "\n\n";
 
-    //std::string s[] = {"aa", "bb", "cc"};
-    //display(s, 3);
-    //maxArray(s, 0, 2);
+    std::cout << "This is an array of strings:\n";
+    std::string s[] = {"aa", "d", "bb", "cc"};
+    display(s, 4);
+    std::cout << "The max value is: " << maxArray(s, 0, 3) << "\n\n";
 
     return 0;
 }
@@ -60,17 +60,39 @@ void display(const ElementType array[], int numElements)
     std::cout << std::endl;
 }
 
+/*-------------------------------------------------------------------------
+  Take an (unordered) array of any type. Find the element stored in the
+  array (between indexes of first and last) with the maximum value by using
+  recursion and the max STL function. Return the element with the maximum
+  value.
 
-// Assume unordered array, such as <1,6,8,3>
+  Pre-condition:  ElementType is a type parameter.
+  Post-condition: The element with the maximum value between indexes first
+  and last in the array are returned.
+ ------------------------------------------------------------------------*/
 template <class ElementType>
 ElementType maxArray(const ElementType array[], int first, int last)
 {
-    if (first > last) // not logical comparison, give exit flag of -1?
-        return -1;
-    else if (first == last) // array size = 1, end of recursion
-        return array[first];    // max of 1 entry is itself
-    // else if (last > first)  // array size > 1, need to split in half
+    // Initialize local variable returnArray so that we can implement only 1 return call.
+    ElementType returnArray;
 
-    int mid = first + (last - first) / 2;
-    return std::max(maxArray(array,first,mid), maxArray(array,mid+1,last));
-}
+    if (first == last) {                // array size = 1, end of recursion
+        returnArray = array[first];     // max of 1 entry is itself
+    }
+    // Regular order of first and last
+    else if (last > first) {            // array size > 1, need to split in half
+        int mid = first + (last - first) / 2;
+        returnArray = std::max(maxArray(array, first, mid), maxArray(array, mid + 1, last));
+    }
+    // Irregular order of first and last.
+    // Since we are interested in returning the maximum value and we are not interested in returning an index like in
+    // binary_search.cpp, then we cannot return -1 if (first > last).
+    // Thus, it would be more logical to proceed with the indexes given and search in a "backwards" manner by swapping
+    // the first and last variables.
+    else { // if (first > last)         // array size > 1, need to split in half
+        int mid = last + (first - last) / 2;
+        returnArray = std::max(maxArray(array, last, mid), maxArray(array, mid + 1, first));
+    }
+
+    return returnArray;
+}   // end maxArray
